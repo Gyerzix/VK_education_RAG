@@ -11,5 +11,5 @@ DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 engine = create_engine(url=f"sqlite:///{DATABASE_PATH.as_posix()}")
 
-SessionLocal = sessionmaker(engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
 
