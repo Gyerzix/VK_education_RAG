@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.connection import SessionLocal
-from app.database.models import Document
+from app.database.models import Document, Chunk
 
 
 def create_document(title: str, url: str, text: str) -> Document:
@@ -21,6 +21,27 @@ def create_document(title: str, url: str, text: str) -> Document:
             session.refresh(document)
 
             return document
+
+        except Exception:
+            session.rollback()
+            raise
+
+def create_chunks(document_id: int, chunks: list[str]) -> list[Chunk]:
+    with SessionLocal() as session:
+        try:
+            chunk_objects = [
+                Chunk(
+                    document_id=document_id,
+                    text=chunk_text,
+                    chunk_index=index
+                )
+                for index, chunk_text in enumerate(chunks)
+            ]
+
+            session.add_all(chunk_objects)
+            session.commit()
+
+            return chunk_objects
 
         except Exception:
             session.rollback()

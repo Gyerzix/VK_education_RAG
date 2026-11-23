@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Text, DateTime
+from sqlalchemy import String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -23,3 +23,13 @@ class Document(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
+class Chunk(Base):
+    __tablename__ = "chunks"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+
+    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), nullable=False)
+
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+
+    chunk_index: Mapped[int] = mapped_column(nullable=False)

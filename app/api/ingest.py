@@ -5,7 +5,9 @@ from pydantic import BaseModel, HttpUrl
 from datetime import datetime
 
 from app.services.parser import parse_url
-from app.database.repository import create_document, get_document_by_url
+from app.services.chunker import split_into_chunks
+from app.services.search_engine import index_chunks
+from app.database.repository import create_document, create_chunks, get_document_by_url
 
 
 router = APIRouter(prefix="/ingest", tags=["Ingestion"])
@@ -49,6 +51,10 @@ async def ingest_document(request: IngestRequest):
             url=parsed_document["url"],
             text=parsed_document["text"]
         )
+
+        chunks = split_into_chunks(document.text)
+        saved_chunks = create_chunks(document_id=document.id, chunks=chunks)
+        index_chunks(saved_chunks)
 
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
